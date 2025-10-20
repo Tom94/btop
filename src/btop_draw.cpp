@@ -24,6 +24,7 @@ tab-size = 4
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <utility>
 
 #include <fmt/format.h>
@@ -516,8 +517,8 @@ namespace Draw {
 }
 
 namespace Cpu {
-	int width_p = 100, height_p = 32;
-	int min_width = 60, min_height = 8;
+	int width_p = 100, height_p = 10;
+	int min_width = 60, min_height = std::thread::hardware_concurrency() / 4 + 6;
 	int x = 1, y = 1, width = 20, height;
 	int b_columns, b_column_size;
 	int b_x, b_y, b_width, b_height;
@@ -994,9 +995,9 @@ namespace Cpu {
 
 #ifdef GPU_SUPPORT
 namespace Gpu {
-	int width_p = 100, height_p = 32;
-	int min_width = 41, min_height = 8;
-	int width = 41, total_height;
+	int width_p = 100, height_p = 10;
+	int min_width = 57, min_height = 12;
+	int width = 57, total_height;
 	vector<int> x_vec = {}, y_vec = {}, b_height_vec = {};
 	int b_width;
 	vector<int> b_x_vec = {}, b_y_vec = {};
@@ -1452,8 +1453,8 @@ namespace Mem {
 }
 
 namespace Net {
-	int width_p = 45, height_p = 28;
-	int min_width = 36, min_height = 6;
+	int width_p = 45, height_p = 18;
+	int min_width = 36, min_height = 13;
 	int x = 1, y, width = 20, height;
 	int b_x, b_y, b_width, b_height, d_graph_height, u_graph_height;
 	bool shown = true, redraw = true;
@@ -2285,11 +2286,11 @@ namespace Draw {
 			if (Gpu::shown != 0 and not (Mem::shown or Net::shown or Proc::shown)) {
 				height = Term::height - Gpu::total_height - gpus_extra_height;
 			} else {
-				height = max(8, (int)ceil((double)Term::height * (trim(boxes) == "cpu" ? 100 : height_p/(Gpu::shown+1) + (Gpu::shown != 0)*5) / 100));
+				height = max(min_height, (int)ceil((double)Term::height * (trim(boxes) == "cpu" ? 100 : height_p/(Gpu::shown+1) + (Gpu::shown != 0)*5) / 100));
 			}
 			if (height <= Term::height-gpus_extra_height) height += gpus_extra_height;
 		#else
-			height = max(8, (int)ceil((double)Term::height * (trim(boxes) == "cpu" ? 100 : height_p) / 100));
+			height = max(min_height, (int)ceil((double)Term::height * (trim(boxes) == "cpu" ? 100 : height_p) / 100));
 		#endif
 			x = 1;
 			y = cpu_bottom ? Term::height - height + 1 : 1;
@@ -2362,7 +2363,7 @@ namespace Draw {
 				redraw[i] = true;
 				int height = 0;
 				width = Term::width;
-				if (Cpu::shown)
+				if (false)
 					if (not (Mem::shown or Net::shown or Proc::shown))
 						height = min_height;
 					else height = Cpu::height;
